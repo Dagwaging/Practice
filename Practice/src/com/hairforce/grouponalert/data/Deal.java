@@ -11,8 +11,6 @@ import java.util.List;
 public class Deal {
 	public Merchant merchant;
 	
-	public Boolean isNowDeal;
-	
 	public String announcementTitle;
 	
 	public String dealUrl;

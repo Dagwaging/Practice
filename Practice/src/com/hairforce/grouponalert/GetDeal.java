@@ -1,5 +1,6 @@
 package com.hairforce.grouponalert;
 
+import android.location.Location;
 import android.os.AsyncTask;
 
 /**
@@ -12,8 +13,12 @@ public class GetDeal extends AsyncTask<Void, Void, Void>{
 
 	@Override
 	protected Void doInBackground(Void... arg0) {
-		// TODO Auto-generated method stub.
-		Utils.getDeals(5.0, 5.0, (float) 5.0);
+		Location location = new Location("Fake");
+		
+		location.setLatitude(39.977384);
+		location.setLongitude(-83.0127741);
+		
+		Utils.getDeals(location, 20);
 		return null;
 	}
 
