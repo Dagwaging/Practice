@@ -51,7 +51,6 @@ public class ActivityService extends IntentService {
 					break;
 				}
 
-				Toast.makeText(getApplicationContext(), name, Toast.LENGTH_SHORT).show();
 
 				if (type == DetectedActivity.ON_FOOT)
 					locationUpdater.start(2000);
