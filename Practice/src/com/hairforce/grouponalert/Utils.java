@@ -6,10 +6,15 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.support.v4.app.NotificationCompat.Builder;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -25,6 +30,38 @@ public class Utils {
 	static boolean servicesConnected(Context context) {
 		return ConnectionResult.SUCCESS == GooglePlayServicesUtil
 				.isGooglePlayServicesAvailable(context);
+	}
+	
+	public static void checkNew(List<Deal> current, Context context) {
+		DatabaseHelper dbHelper = new DatabaseHelper(context);
+		
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
+		
+		List<Deal> seen = Deal.getAll(db);
+		
+		for(Deal deal : current) {
+			if(seen.contains(deal))
+				deal.update(db);
+			else {
+				deal.insert(db);
+				
+				NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+				
+				Notification notification = new Builder(context)
+						.setSmallIcon(R.drawable.ic_launcher).setContentTitle(deal.announcementTitle)
+						.setTicker(deal.announcementTitle).setContentText(deal.title).setWhen(new Date().getTime()).build();
+		
+				notificationManager.notify(Integer.parseInt(deal.id), notification);
+			}
+		}
+		
+		seen = Deal.getAll(db);
+		
+		for(Deal deal : seen) {
+			if(new Date().getTime() - deal.lastSeen > 1 * 60 * 60 * 1000) {
+				deal.delete(db);
+			}
+		}
 	}
 
 	public static List<Deal> getDeals(Location location, int radius) {

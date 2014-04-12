@@ -1,6 +1,7 @@
 package com.hairforce.grouponalert;
 
 import java.util.Date;
+import java.util.List;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat.Builder;
 
 import com.google.android.gms.location.LocationClient;
+import com.hairforce.grouponalert.data.Deal;
 
 public class LocationService extends IntentService {
 
@@ -26,18 +28,9 @@ public class LocationService extends IntentService {
 			
 			Location location = extras.getParcelable(LocationClient.KEY_LOCATION_CHANGED);
 			
-			double lat = location.getLatitude();
-			double lng = location.getLongitude();
+			List<Deal> newDeals = Utils.getDeals(location, 1000);
 			
-			String name = String.format("%f, %f", lat, lng);
-	
-			NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-	
-			Notification notification = new Builder(this)
-					.setSmallIcon(R.drawable.ic_launcher).setContentTitle(name)
-					.setTicker(name).setWhen(new Date().getTime()).build();
-	
-			notificationManager.notify(0, notification);
+			Utils.checkNew(newDeals, this);
 		}
 	}
 
