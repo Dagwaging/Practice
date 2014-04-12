@@ -7,6 +7,7 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="19" />
     <compatible-screens></compatible-screens>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
