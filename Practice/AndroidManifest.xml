@@ -25,6 +25,7 @@
         </activity>
         <service android:name="ActivityService"></service>
         <service android:name="LocationService"></service>
+        <activity android:name="SettingsActivity"></activity>
     </application>
 
 </manifest>

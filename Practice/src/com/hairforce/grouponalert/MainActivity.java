@@ -1,18 +1,25 @@
 package com.hairforce.grouponalert;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+
+import com.hairforce.grouponalert.data.Deal;
 
 public class MainActivity extends FragmentActivity implements OnClickListener {
 	private Button start;
@@ -32,6 +39,44 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		stop.setOnClickListener(this);
 		
 		activityUpdater = new ActivityUpdater(this, ActivityService.class);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main, menu);
+		
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+		case R.id.demo:
+			AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+				
+				@Override
+				protected Void doInBackground(Void... params) {
+					Location location = new Location("Fake");
+					location.setLatitude(39.9698419286);
+					location.setLongitude(-83.0096569857);
+					
+					List<Deal> newDeals = Utils.getDeals(location, 1000);
+					
+					Utils.checkNew(newDeals, MainActivity.this);
+					return null;
+				}
+			};
+			
+			asyncTask.execute();
+			
+			break;
+		case R.id.settings:
+			startActivity(new Intent(this, SettingsActivity.class));
+			
+			break;
+		}
+		
+		return true;
 	}
 
 	@Override
