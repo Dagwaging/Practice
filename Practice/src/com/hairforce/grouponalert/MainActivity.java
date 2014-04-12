@@ -1,10 +1,5 @@
 package com.hairforce.grouponalert;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +10,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -24,9 +18,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	private Button start;
 	private Button stop;
 	private ActivityUpdater activityUpdater;
-	public static final String CLIENT_ID = "1D62CAE756A99D4783B724D2EFC4796F";
-	private float radius;
-	private GetDeal getDeal;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -90,29 +81,5 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 			
 			break;
 		}
-	}
-	
-		public static void getDeals(double longitude, double latitude, float radius) {
-		try {
-			URL url = new URL("http://api.groupon.com/v2/deals.json?client_id="
-					+ CLIENT_ID + "&postal_code=95120");
-			BufferedReader in;
-			try {
-				in = new BufferedReader(
-						new InputStreamReader(url.openStream()));
-				String inputLine;
-				while ((inputLine = in.readLine()) != null)
-					Log.d("Words", inputLine);
-				in.close();
-			} catch (IOException exception) {
-				// TODO Auto-generated catch-block stub.
-				exception.printStackTrace();
-			}
-		} catch (MalformedURLException exception) {
-			// TODO Auto-generated catch-block stub.
-			exception.printStackTrace();
-		}
-
-
 	}
 }

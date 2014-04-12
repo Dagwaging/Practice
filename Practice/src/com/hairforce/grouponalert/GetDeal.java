@@ -13,7 +13,7 @@ public class GetDeal extends AsyncTask<Void, Void, Void>{
 	@Override
 	protected Void doInBackground(Void... arg0) {
 		// TODO Auto-generated method stub.
-		MainActivity.getDeals(5.0, 5.0, (float) 5.0);
+		Utils.getDeals(5.0, 5.0, (float) 5.0);
 		return null;
 	}
 
