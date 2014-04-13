@@ -34,4 +34,8 @@ public class Deal {
 	public String id;
 	
 	public List<Option> options;
+
+	public String address;
+
+	public float distance;
 }

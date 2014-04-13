@@ -1,5 +1,7 @@
 package com.hairforce.grouponalert;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +17,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.FrameLayout;
+import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -25,9 +35,15 @@ import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailed
 import com.google.android.gms.location.LocationClient;
 import com.hairforce.grouponalert.data.Deal;
 
-public class MainActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener {
+public class MainActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener, OnItemClickListener {
 	private ActivityUpdater activityUpdater;
 	private LocationClient locationClient;
+	
+	private ListView listView;
+	
+	private ProgressBar progressBar;
+	
+	private DealAdapter dealAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +51,17 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		
 		setContentView(R.layout.activity_main);
 		
+		dealAdapter = new DealAdapter(this);
+		
+		progressBar = new ProgressBar(this);
+		progressBar.setIndeterminate(true);
+		
+		addContentView(progressBar, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+		
+		listView = (ListView) findViewById(R.id.ListView1);
+		listView.setEmptyView(progressBar);
+		listView.setAdapter(dealAdapter);
+		listView.setOnItemClickListener(this);
 	}
 
 	@Override
@@ -42,6 +69,36 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		getMenuInflater().inflate(R.menu.main, menu);
 		
 		return true;
+	}
+	
+	@Override
+	public void onStart() {
+		super.onStart();
+		
+		AsyncTask<Void, Void, List<Deal>> getLocal = new AsyncTask<Void, Void, List<Deal>>() {
+
+			@Override
+			protected List<Deal> doInBackground(Void... params) {
+				Location location = new Location("Fake");
+				location.setLatitude(40.722965);
+				location.setLongitude(-74.003893);
+				
+				return Utils.getDeals(location, 10000);
+			}
+
+			@Override
+			protected void onPostExecute(List<Deal> result) {
+				Collections.sort(result, new Comparator<Deal>() {
+					@Override
+					public int compare(Deal lhs, Deal rhs) {
+						return (int) (lhs.distance - rhs.distance);
+					}
+				});
+				
+				dealAdapter.setData(result);
+			}
+		};
+		getLocal.execute();
 	}
 
 	@Override
@@ -82,12 +139,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		locationClient = new LocationClient(this, this, this);
 		
 		locationClient.connect();
-		
-		GetDeal getDeal = new GetDeal();
-		getDeal.execute();
-		//sendAlertToPebble();
-		
-		//openInGrouponApp();
 	}
 
 	private void sendAlertToPebble() {
@@ -106,13 +157,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		intent.putExtra("notificationData", notificationData);
 		
 		sendBroadcast(intent);
-	}
-	
-	private void openInGrouponApp() {
-		final Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setData(Uri.parse("http://www.groupon.com/redirect/deals/seadog-cruises-13"));
-		
-		startActivity(intent);
 	}
 
 	@Override
@@ -133,8 +177,16 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
 		prefs.edit().putFloat("startLat", (float) location.getLatitude()).putFloat("startLng", (float) location.getLongitude()).commit();
 		
-		Toast.makeText(MainActivity.this, String.format("%f, %f", location.getLatitude(), location.getLongitude()), Toast.LENGTH_SHORT).show();
+		//Toast.makeText(MainActivity.this, String.format("%f, %f", location.getLatitude(), location.getLongitude()), Toast.LENGTH_SHORT).show();
 		
 		locationClient.disconnect();
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.groupon.com/dispatch/us/deal/" + dealAdapter.getItem(position).id));
+		
+		startActivity(intent);
 	}
 }

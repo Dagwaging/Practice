@@ -14,4 +14,8 @@ public class Option {
 	public String title;
 	
 	public int discountPercent;
+
+	public Cost value;
+
+	public Cost price;
 }

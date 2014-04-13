@@ -103,6 +103,9 @@ public class Utils {
 							if(location.distanceTo(rLocation) < radius && !deal.isSoldOut) {
 								isNear = true;
 								
+								deal.address = redemptionLocation.streetAddress1;
+								deal.distance = location.distanceTo(rLocation);
+								
 								break;
 							}
 						}

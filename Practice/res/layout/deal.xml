@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    android:padding="8dp" >
+
+    <TextView
+        android:id="@+id/address1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/price"
+        android:layout_alignBottom="@+id/price"
+        android:layout_alignParentRight="true"
+        android:text="1029 West 35th Street (50m)" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="4dp"
+        android:layout_toRightOf="@id/address1"
+        android:text="51% Off Painting and a Play with Wine at Live Purple Art"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/title"
+        android:layout_margin="4dp"
+        android:text="$45"
+        android:textColor="#FFCCCCCC" />
+
+    <TextView
+        android:id="@+id/price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/value"
+        android:layout_alignBottom="@+id/value"
+        android:layout_toRightOf="@+id/value"
+        android:text="$22"
+        android:textColor="#FF81B740"
+        android:textStyle="bold" />
+
+</RelativeLayout>
