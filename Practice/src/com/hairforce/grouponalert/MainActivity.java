@@ -8,23 +8,26 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationClient;
 import com.hairforce.grouponalert.data.Deal;
 
-public class MainActivity extends FragmentActivity implements OnClickListener {
-	private Button start;
-	private Button stop;
+public class MainActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener {
 	private ActivityUpdater activityUpdater;
+	private LocationClient locationClient;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,13 +35,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		
 		setContentView(R.layout.activity_main);
 		
-		start = (Button) findViewById(R.id.button1);
-		stop = (Button) findViewById(R.id.button2);
-		
-		start.setOnClickListener(this);
-		stop.setOnClickListener(this);
-		
-		activityUpdater = new ActivityUpdater(this, ActivityService.class);
 	}
 
 	@Override
@@ -82,6 +78,11 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		locationClient = new LocationClient(this, this, this);
+		
+		locationClient.connect();
+		
 		GetDeal getDeal = new GetDeal();
 		getDeal.execute();
 		//sendAlertToPebble();
@@ -115,16 +116,25 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	}
 
 	@Override
-	public void onClick(View v) {
-		switch(v.getId()) {
-		case R.id.button1:
-			activityUpdater.start(2000);
-			
-			break;
-		case R.id.button2:
-			activityUpdater.stop();
-			
-			break;
-		}
+	public void onConnectionFailed(ConnectionResult arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onDisconnected() {
+	}
+	
+	@Override
+	public void onConnected(Bundle data) {
+		
+		Location location = locationClient.getLastLocation();
+		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+		prefs.edit().putFloat("startLat", (float) location.getLatitude()).putFloat("startLng", (float) location.getLongitude()).commit();
+		
+		Toast.makeText(MainActivity.this, String.format("%f, %f", location.getLatitude(), location.getLongitude()), Toast.LENGTH_SHORT).show();
+		
+		locationClient.disconnect();
 	}
 }

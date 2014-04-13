@@ -49,7 +49,7 @@ public class Utils {
 		Iterator<Entry<String, Long>> iterator = seen.entrySet().iterator();
 		
 		while(iterator.hasNext()) {
-			if(new Date().getTime() - iterator.next().getValue() > 1 * 10 * 1000)
+			if(new Date().getTime() - iterator.next().getValue() > 1 * 60 * 1000)
 				iterator.remove();
 		}
 		
@@ -89,7 +89,7 @@ public class Utils {
 				in = new BufferedReader(new InputStreamReader(url.openStream()));
 				
 				getDealsData data = gson.fromJson(in, getDealsData.class);
-				
+				 
 				for(Deal deal : data.deals) {
 					boolean isNear = false;
 					

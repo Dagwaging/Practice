@@ -31,7 +31,7 @@ public class LocationUpdater implements ConnectionCallbacks, OnConnectionFailedL
 		client = new LocationClient(context, this, this);
 		
 		request = LocationRequest.create();
-		request.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+		request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		
 		Intent intent = new Intent(context, clazz);
 		
