@@ -93,6 +93,7 @@ public class Utils {
 				NotificationCompat.BigTextStyle notificationBuilder = new NotificationCompat.BigTextStyle(
 						new Builder(context).setSmallIcon(R.drawable.ic_status)
 								.setContentTitle(deal.shortAnnouncementTitle)
+								.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.meow))
 								.setContentText(deal.announcementTitle)
 								.setContentInfo((int) deal.distance + "m")
 								.setContentIntent(pendingIntent)).bigText(deal.announcementTitle);
@@ -130,6 +131,7 @@ public class Utils {
 							.setSmallIcon(R.drawable.ic_status)
 								.setWhen(new Date().getTime())
 								.setContentIntent(pendingIntent)
+								.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.meow))
 								.setContentTitle(
 										newDeals.size() + " deals nearby")
 								.setTicker(newDeals.size() + " deals nearby"));
