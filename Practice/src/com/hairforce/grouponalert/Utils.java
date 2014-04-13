@@ -21,11 +21,14 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
+import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -88,10 +91,11 @@ public class Utils {
 						context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 				NotificationCompat.BigTextStyle notificationBuilder = new NotificationCompat.BigTextStyle(
-						new Builder(context)
+						new Builder(context).setSmallIcon(R.drawable.ic_status)
 								.setContentTitle(deal.shortAnnouncementTitle)
 								.setContentText(deal.announcementTitle)
-								.setContentIntent(pendingIntent));
+								.setContentInfo((int) deal.distance + "m")
+								.setContentIntent(pendingIntent)).bigText(deal.announcementTitle);
 
 				notificationManager.notify(0, notificationBuilder.build());
 
@@ -123,7 +127,7 @@ public class Utils {
 
 				NotificationCompat.InboxStyle inboxBuilder = new NotificationCompat.InboxStyle(
 						new Builder(context)
-								.setSmallIcon(R.drawable.ic_launcher)
+							.setSmallIcon(R.drawable.ic_status)
 								.setWhen(new Date().getTime())
 								.setContentIntent(pendingIntent)
 								.setContentTitle(
@@ -133,7 +137,9 @@ public class Utils {
 				for (Deal deal : newDeals) {
 					SpannableStringBuilder line = new SpannableStringBuilder();
 
-					line.append(deal.shortAnnouncementTitle);
+					line.append(deal.shortAnnouncementTitle).append(" ").append(String.format("(%dm)", (int) deal.distance));
+					line.setSpan(new StyleSpan(Typeface.BOLD), 0, deal.shortAnnouncementTitle.length(),
+							Spannable.SPAN_MARK_MARK);
 
 					deals.append(deal.shortAnnouncementTitle + "\n");
 

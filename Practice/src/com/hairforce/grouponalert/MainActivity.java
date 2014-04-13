@@ -35,7 +35,7 @@ import com.hairforce.grouponalert.LocationReceiver.LocationListener;
 import com.hairforce.grouponalert.data.Deal;
 
 public class MainActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener, OnItemClickListener, OnCheckedChangeListener, LocationListener {
-	private ActivityUpdater activityUpdater;
+	private LocationUpdater locationUpdater;
 	private LocationClient locationClient;
 	
 	private ListView listView;
@@ -63,7 +63,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		
 		setContentView(R.layout.activity_main);
 		
-		activityUpdater = new ActivityUpdater(this, ActivityService.class);
+		locationUpdater = new LocationUpdater(this, LocationService.class);
 		
 		dealAdapter = new DealAdapter(this);
 		
@@ -99,7 +99,7 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		
 		if(prefs.getBoolean("notifications", false))
-			activityUpdater.start(2000);
+			locationUpdater.start(2000);
 		
 		locationClient = new LocationClient(this, this, this);
 		
@@ -239,9 +239,9 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		prefs.edit().putBoolean("notifications", isChecked).commit();
 		
 		if(isChecked)
-			activityUpdater.start(2000);
+			locationUpdater.start(2000);
 		else
-			activityUpdater.stop();
+			locationUpdater.stop();
 	}
 
 	@Override
