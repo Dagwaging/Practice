@@ -1,15 +1,12 @@
 package com.hairforce.grouponalert;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
@@ -19,23 +16,25 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.widget.Switch;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationClient;
+import com.hairforce.grouponalert.LocationReceiver.LocationListener;
 import com.hairforce.grouponalert.data.Deal;
 
-public class MainActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener, OnItemClickListener {
+public class MainActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener, OnItemClickListener, OnCheckedChangeListener, LocationListener {
 	private ActivityUpdater activityUpdater;
 	private LocationClient locationClient;
 	
@@ -44,12 +43,27 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	private ProgressBar progressBar;
 	
 	private DealAdapter dealAdapter;
+	
+	private boolean start;
+	
+	private LocationReceiver locationReceiver;
+	
+	private Switch enabled;
+	
+	public static double FAKE_LAT = 40.7320215;
+	public static double FAKE_LNG = -73.9963378;
+	
+	static final double SCALE = 100;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		locationReceiver = new LocationReceiver(this);
+		
 		setContentView(R.layout.activity_main);
+		
+		activityUpdater = new ActivityUpdater(this, ActivityService.class);
 		
 		dealAdapter = new DealAdapter(this);
 		
@@ -68,6 +82,13 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
 		
+		enabled = (Switch) menu.getItem(1).getActionView().findViewById(R.id.switch1);
+		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		
+		enabled.setChecked(prefs.getBoolean("notifications", false));
+		enabled.setOnCheckedChangeListener(this);
+		
 		return true;
 	}
 	
@@ -75,92 +96,34 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	public void onStart() {
 		super.onStart();
 		
-		AsyncTask<Void, Void, List<Deal>> getLocal = new AsyncTask<Void, Void, List<Deal>>() {
-
-			@Override
-			protected List<Deal> doInBackground(Void... params) {
-				Location location = new Location("Fake");
-				location.setLatitude(40.722965);
-				location.setLongitude(-74.003893);
-				
-				return Utils.getDeals(location, 10000);
-			}
-
-			@Override
-			protected void onPostExecute(List<Deal> result) {
-				Collections.sort(result, new Comparator<Deal>() {
-					@Override
-					public int compare(Deal lhs, Deal rhs) {
-						return (int) (lhs.distance - rhs.distance);
-					}
-				});
-				
-				dealAdapter.setData(result);
-			}
-		};
-		getLocal.execute();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		
+		if(prefs.getBoolean("notifications", false))
+			activityUpdater.start(2000);
+		
+		locationClient = new LocationClient(this, this, this);
+		
+		start = true;
+		
+		locationClient.connect();
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId()) {
-		case R.id.demo:
-			AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-				
-				@Override
-				protected Void doInBackground(Void... params) {
-					Location location = new Location("Fake");
-					location.setLatitude(39.9698419286);
-					location.setLongitude(-83.0096569857);
-					
-					List<Deal> newDeals = Utils.getDeals(location, 1000);
-					
-					Utils.checkNew(newDeals, MainActivity.this);
-					return null;
-				}
-			};
-			
-			asyncTask.execute();
-			
-			break;
-		case R.id.settings:
-			startActivity(new Intent(this, SettingsActivity.class));
-			
-			break;
-		}
+	protected void onPause() {
+		super.onPause();
 		
-		return true;
+		unregisterReceiver(locationReceiver);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 		
-		locationClient = new LocationClient(this, this, this);
-		
-		locationClient.connect();
-	}
-
-	private void sendAlertToPebble() {
-		final Intent intent = new Intent("com.getpebble.action.SEND_NOTIFICATION");
-		
-		final Map<String, String> data = new HashMap<String, String>();
-		
-		data.put("title", "This was a triumph");
-		data.put("body", "I'm making a note here, huge success");
-		
-		final JSONObject jsonData = new JSONObject(data);
-		final String notificationData = new JSONArray().put(jsonData).toString();
-		
-		intent.putExtra("messageType", "PEBBLE_ALERT");
-		intent.putExtra("sender", "Groupon Alert");
-		intent.putExtra("notificationData", notificationData);
-		
-		sendBroadcast(intent);
+		registerReceiver(locationReceiver, new IntentFilter("com.hairforce.grouponalert.LOCATION"));
 	}
 
 	@Override
-	public void onConnectionFailed(ConnectionResult arg0) {
+	public void onConnectionFailed(ConnectionResult result) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -171,11 +134,90 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 	
 	@Override
 	public void onConnected(Bundle data) {
+		final Location location = locationClient.getLastLocation();
 		
-		Location location = locationClient.getLastLocation();
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-		prefs.edit().putFloat("startLat", (float) location.getLatitude()).putFloat("startLng", (float) location.getLongitude()).commit();
+		
+		if(start)
+			prefs.edit().putFloat("startLat", (float) location.getLatitude()).putFloat("startLng", (float) location.getLongitude()).commit();
+		
+		start = false;
+		
+		double lat = location.getLatitude();
+		double lng = location.getLongitude();
+		
+		lat -= prefs.getFloat("startLat", 0);
+		lng -= prefs.getFloat("startLng", 0);
+		
+		lat *= SCALE;
+		lng *= SCALE;
+		
+		lat += MainActivity.FAKE_LAT;
+		lng += MainActivity.FAKE_LNG;
+		
+		location.setLatitude(lat);
+		location.setLongitude(lng);
+		
+		Intent intent= getIntent();
+		
+		if(intent.getExtras() != null) {
+			final String[] ids = intent.getStringArrayExtra("deals");
+			
+			AsyncTask<Void, Void, List<Deal>> getDeals = new AsyncTask<Void, Void, List<Deal>>() {
+				
+				@Override
+				protected List<Deal> doInBackground(Void... params) {
+					List<Deal> deals = new ArrayList<Deal>();
+					
+					for(String id : ids)
+						deals.add(Utils.getDeal(id, location));
+					
+					return deals;
+				}
+	
+				@Override
+				protected void onPostExecute(List<Deal> result) {
+					Collections.sort(result, new Comparator<Deal>() {
+						@Override
+						public int compare(Deal lhs, Deal rhs) {
+							return (int) (lhs.distance - rhs.distance);
+						}
+					});
+					
+					progressBar.setVisibility(View.GONE);
+					
+					dealAdapter.setData(result);
+				}
+			};
+			
+			getDeals.execute();
+		}
+		else {
+			AsyncTask<Void, Void, List<Deal>> getLocal = new AsyncTask<Void, Void, List<Deal>>() {
+	
+				@Override
+				protected List<Deal> doInBackground(Void... params) {
+					return Utils.getDeals(location, 10000);
+				}
+	
+				@Override
+				protected void onPostExecute(List<Deal> result) {
+					Collections.sort(result, new Comparator<Deal>() {
+						@Override
+						public int compare(Deal lhs, Deal rhs) {
+							return (int) (lhs.distance - rhs.distance);
+						}
+					});
+					
+					progressBar.setVisibility(View.GONE);
+					
+					dealAdapter.setData(result);
+				}
+			};
+			
+			getLocal.execute();
+		}
 		
 		//Toast.makeText(MainActivity.this, String.format("%f, %f", location.getLatitude(), location.getLongitude()), Toast.LENGTH_SHORT).show();
 		
@@ -188,5 +230,28 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.groupon.com/dispatch/us/deal/" + dealAdapter.getItem(position).id));
 		
 		startActivity(intent);
+	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		
+		prefs.edit().putBoolean("notifications", isChecked).commit();
+		
+		if(isChecked)
+			activityUpdater.start(2000);
+		else
+			activityUpdater.stop();
+	}
+
+	@Override
+	public void onLocationChanged() {
+		dealAdapter.setData(new ArrayList<Deal>());
+		
+		progressBar.setVisibility(View.VISIBLE);
+		
+		locationClient = new LocationClient(this, this, this);
+		
+		locationClient.connect();
 	}
 }

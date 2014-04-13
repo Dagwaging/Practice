@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class DealMap extends HashMap<String, Long> {
+	private static final long serialVersionUID = 2085494577150982285L;
+
 	public void load(SQLiteDatabase db) {
 		String query = "SELECT * FROM " + Deal.TABLE;
 		

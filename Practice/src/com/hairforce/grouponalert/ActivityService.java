@@ -2,7 +2,6 @@ package com.hairforce.grouponalert;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.widget.Toast;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
@@ -28,7 +27,7 @@ public class ActivityService extends IntentService {
 			int type = activity.getType();
 
 			if (Utils.servicesConnected(this)) {
-				String name;
+/*				String name;
 
 				switch (type) {
 				case DetectedActivity.IN_VEHICLE:
@@ -50,7 +49,7 @@ public class ActivityService extends IntentService {
 					name = "Unknown";
 					break;
 				}
-
+*/
 
 				if (type == DetectedActivity.ON_FOOT)
 					locationUpdater.start(2000);
