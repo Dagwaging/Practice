@@ -42,8 +42,8 @@ public class LocationService extends IntentService {
 			lat += MainActivity.FAKE_LAT;
 			lng += MainActivity.FAKE_LNG;
 			
-			location.setLatitude(lat);
-			location.setLongitude(lng);
+//			location.setLatitude(lat);
+//			location.setLongitude(lng);
 			
 			List<Deal> newDeals = Utils.getDeals(location, 1000);
 			

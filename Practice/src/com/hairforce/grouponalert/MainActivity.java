@@ -156,12 +156,12 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		lat += MainActivity.FAKE_LAT;
 		lng += MainActivity.FAKE_LNG;
 		
-		location.setLatitude(lat);
-		location.setLongitude(lng);
-		
+//		location.setLatitude(lat);
+//		location.setLongitude(lng);
+	
 		Intent intent= getIntent();
 		
-		if(intent.getExtras() != null) {
+		if(intent.getExtras() != null && intent.getStringArrayExtra("deals") != null) {
 			final String[] ids = intent.getStringArrayExtra("deals");
 			
 			AsyncTask<Void, Void, List<Deal>> getDeals = new AsyncTask<Void, Void, List<Deal>>() {
