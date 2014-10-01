@@ -3,7 +3,33 @@
 
     <SwitchPreference
         android:key="notifications"
-        android:title="Groupon alerts" 
-        android:summary="Receive notifications when you walk past Groupon deals"/>
+        android:summary="Receive notifications when you walk past Groupon deals"
+        android:title="Groupon alerts" />
+
+    <ListPreference
+        android:entries="@array/distances_key"
+        android:entryValues="@array/distance_values"
+        android:key="range"
+        android:summary="How far Groupon Cat should looks for deals?"
+        android:title="Range" />
+    <ListPreference
+        android:key="tone"
+        android:summary="How should Groupon Cat notify you?"
+        android:title="Tone" />
+    <ListPreference
+        android:key="cost"
+        android:summary="On a budget? Find deals under the selected price"
+        android:title="Filter by cost" />
+    <ListPreference
+        android:key="updateSpeed"
+        android:summary="How often should Groupon Cat check for deals"
+        android:title="Refresh Rate" />
+
+    <CheckBoxPreference
+        android:key="vibrate"
+        android:title="Vibrate" />
+    <CheckBoxPreference
+        android:key="LED"
+        android:title="LED" />
 
 </PreferenceScreen>

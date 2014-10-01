@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
@@ -34,7 +35,7 @@ import com.google.android.gms.location.LocationClient;
 import com.hairforce.grouponalert.LocationReceiver.LocationListener;
 import com.hairforce.grouponalert.data.Deal;
 
-public class MainActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener, OnItemClickListener, OnCheckedChangeListener, LocationListener {
+public class MainActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener, OnItemClickListener, LocationListener {
 	private LocationUpdater locationUpdater;
 	private LocationClient locationClient;
 	
@@ -80,18 +81,26 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		
-		enabled = (Switch) menu.getItem(1).getActionView().findViewById(R.id.switch1);
-		
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		
-		enabled.setChecked(prefs.getBoolean("notifications", false));
-		enabled.setOnCheckedChangeListener(this);
+		getMenuInflater().inflate(R.menu.main, menu);		
 		
 		return true;
 	}
 	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if(item.getItemId() == R.id.settings) {
+			Intent intent = new Intent(this, SettingsActivity.class);
+			startActivity(intent);
+			
+			return true;
+		}
+		
+		return super.onOptionsItemSelected(item);
+	}
+
 	@Override
 	public void onStart() {
 		super.onStart();
@@ -230,18 +239,6 @@ public class MainActivity extends FragmentActivity implements ConnectionCallback
 		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.groupon.com/dispatch/us/deal/" + dealAdapter.getItem(position).id));
 		
 		startActivity(intent);
-	}
-
-	@Override
-	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		
-		prefs.edit().putBoolean("notifications", isChecked).commit();
-		
-		if(isChecked)
-			locationUpdater.start(2000);
-		else
-			locationUpdater.stop();
 	}
 
 	@Override
