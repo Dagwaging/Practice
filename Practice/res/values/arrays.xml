@@ -2,11 +2,15 @@
 <resources>
 
     <string-array name="distances_key">
-        <item>"500 meters</item>
+        <item>"1000 Feet</item>
+        <item> "1 Mile</item>
+        <item>"5 Miles</item>
     </string-array>
 
     <integer-array name="distance_values">
-        <item> 500</item>
+        <item> 1000</item>
+        <item >5280</item>
+        <item >26400</item>
     </integer-array>
 
 </resources>
